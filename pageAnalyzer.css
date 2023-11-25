@@ -1,0 +1,83 @@
+body
+{
+	width: 450px;
+
+	background-color: rgb(28, 28, 28);
+	color: white;
+
+	font-family: "Verdana", "Arial", "Helvetica", Sans-serif;
+	font-size: small;
+}
+
+input, label, button, select, textarea, a
+{
+	font-family: "Verdana", "Arial", "Helvetica", Sans-serif;
+	font-size: small;
+	
+	border-radius: 5px;
+}
+
+a
+{
+	color: dodgerblue;
+}
+
+hr
+{
+	border: solid 1px rgb(125, 125, 125);
+}
+
+/* -------------------------------------------------- */
+
+#mainDiv
+{
+	width: 100%;
+	text-align: center;
+	
+	border: solid 1px rgb(125, 125, 125);
+	border-radius: 10px;
+
+	background-color: rgb(36, 41, 46);
+}
+
+#analysisDiv
+{
+	margin: auto;
+	width: 90%;
+	text-align: left;
+}
+
+#analysis
+{
+	background-color: rgb(36, 41, 46);
+	color: white;
+	border: none;
+	
+	width: 400px;
+	max-width: 400px;
+	height: 20px;
+	min-height: 20px;
+	max-height: 350px;
+
+	font-size: small;
+	word-wrap: normal;
+}
+
+#reqStatusDiv
+{
+	margin: auto;
+	width: 90%;
+	text-align: left;
+}
+
+#reqstatus
+{
+	word-wrap: normal;
+	font-size: small;
+}
+
+#footerTable
+{
+	width: 100%;
+	margin:auto;
+}

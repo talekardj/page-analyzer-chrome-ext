@@ -1,0 +1,24 @@
+{
+	"manifest_version": 3,
+	"version": "1.0",
+	"name": "Page analyzer",
+	"description": "This plugin analyzes current page and requests, and provides recommendations to improve performance.",
+	"author": "Dhananjay Talekar : talekardj@outlook.com",
+	"icons": {
+		"16": "logo16.png",
+		"32": "logo32.png",
+		"64": "logo64.png"
+	},
+	"offline_enabled": false,
+	"host_permissions": ["https://*/"],
+	"permissions" : [
+		"storage"
+	],
+	"action":{
+		"default_popup": "pageAnalyzer.html",
+		"default_title": "Page analyzer"
+	},
+	"background": {
+		"service_worker": "background.js"
+	}
+}
