@@ -58,15 +58,13 @@ function openPortalUrl()
 
 function processResponseFetchPageDetails(resp)
 {
-	document.getElementById("fetchDataButton").disabled = false;
-
 	if(isStringEmpty(resp))
 	{
 		showLog("Analysis status: Some unexpected error have occurred", true);
 	}
 	else
 	{
-		let data = JSON.parse(resp.response);
+		let data = JSON.parse(resp);
 
 		showLog("Analysis status: " + data.message, data.isError);
 		
@@ -75,32 +73,6 @@ function processResponseFetchPageDetails(resp)
 			
 		/* document.getElementById("saveResultsButton").disabled = false; */
 	}
-}
-
-function fetchPageDetails()
-{
-	if(isStringEmpty(currentPageURL))
-	{
-		showLog("Analysis status: Not a valid URL", true);
-	}
-	else if(!isValidUrl(currentPageURL))
-	{
-		showLog("Analysis status: Not a valid URL", true);
-	}
-	else
-	{
-		resetValues();
-		document.getElementById("fetchDataButton").disabled = true;
-		showLog("Analysis status: analyzing...", false);
-
-		let message = {
-			activity: "analyzePage", 
-			reqUrl: currentPageURL.trim()
-		};
-
-		chrome.runtime.sendMessage(message, function(resp) { processResponseFetchPageDetails(resp); });
-	}
-	
 }
 
 //-------------------------
@@ -113,8 +85,21 @@ function resetValues()
 
 function bindHandlers()
 {
-	document.getElementById("fetchDataButton").addEventListener("click", fetchPageDetails);
 	document.getElementById("portalUrl").addEventListener("click", openPortalUrl);
+
+	chrome.runtime.onMessage.addListener(
+		function(request, sender, sendResponse) {
+			if (request.activity === "analyzePageComplete")
+			{
+				processResponseFetchPageDetails(JSON.stringify(request.data));
+			}
+			else
+			{
+				console.error("bg : onMessage : invalid message <" + request.activity + ">");
+			}
+			return true;
+		}
+	);
 }
 
 function initialize()

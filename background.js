@@ -90,9 +90,13 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 		})();
 		console.debug("bg : onInstalled : page analyzer side panel created.");
 
-		//get data
-
 		chrome.sidePanel.open({ tabId: tab.tabId, windowId: tab.windowId });
+
+		// -----
+
+		chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
+			processMessageFetchPageDetails(tabs[0].url);
+		});
 	}
 });
 
@@ -168,14 +172,14 @@ function getReadableTTL(input)
 	return ttl.trim();
 }
 
-function parseResponseFetchPageDetails(request, response, pageDetails)
+function parseResponseFetchPageDetails(reqUrl, response, pageDetails)
 {
 	//console.debug("bg : parseResponseFetchPageDetails : response <" + response.toString() + ">");
 	//response.headers.get("x-nv-debug");
 	//parseInt(hdr_age);
 	//getReadableTTL(cacheTTL);
 
-	pageDetails.responseStatus.url = request.reqUrl;
+	pageDetails.responseStatus.url = reqUrl;
 	pageDetails.responseStatus.httpStatus = response.status;
 
 	if(response.status > 299)
@@ -192,11 +196,11 @@ function parseResponseFetchPageDetails(request, response, pageDetails)
 	return pageDetails;
 }
 
-function processMessageFetchPageDetails(request, sendResponse)
+function processMessageFetchPageDetails(reqUrl)
 {
-	console.debug("bg : processMessageFetchPageDetails : request.reqUrl <" + request.reqUrl + ">");
+	console.debug("bg : processMessageFetchPageDetails : reqUrl <" + reqUrl + ">");
 	timeout(timeoutMsec, 
-			fetch(request.reqUrl, {
+			fetch(reqUrl, {
 				method: "GET",
 				headers: debugHeaders,
 				mode: "cors"
@@ -205,19 +209,25 @@ function processMessageFetchPageDetails(request, sendResponse)
 		let pageDetails = getDefaultResponseObject();
 		pageDetails.isError = false;
 		pageDetails.message = "success";
-		pageDetails = parseResponseFetchPageDetails(request, response, pageDetails);
-
+		pageDetails = parseResponseFetchPageDetails(reqUrl, response, pageDetails);
 		console.debug("bg : processMessageFetchPageDetails : pageDetails <" + JSON.stringify(pageDetails) + ">");
-		sendResponse({response : JSON.stringify(pageDetails)});
+
+		chrome.runtime.sendMessage({
+			activity: "analyzePageComplete", 
+			data: pageDetails
+		});
 	})
 	.catch(function (err) {
 		console.error("bg : processMessageFetchPageDetails : fetch failed <" + err.message + ">");
 		let pageDetails = getDefaultResponseObject();
 		pageDetails.isError = true;
 		pageDetails.message = err.message;
-		pageDetails = parseResponseFetchPageDetails(request, response, pageDetails);
-		
+		pageDetails = parseResponseFetchPageDetails(reqUrl, response, pageDetails);
 		console.error("bg : processMessageFetchPageDetails : pageDetails <" + JSON.stringify(pageDetails) + ">");
-		sendResponse({response : JSON.stringify(pageDetails)});
+
+		chrome.runtime.sendMessage({
+			activity: "analyzePageComplete", 
+			data: pageDetails
+		});
 	});
 }
