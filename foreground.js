@@ -68,29 +68,40 @@ function processResponseFetchPageDetails(resp)
 	else
 	{
 		let data = JSON.parse(resp.response);
+
 		showLog("Analysis status: " + data.message, data.isError);
-		if(!data.isError)
-		{
-			document.getElementById("analysis").value = JSON.stringify(data, null, 4);
-			resizeResults();
+		
+		document.getElementById("analysis").value = JSON.stringify(data, null, 4);
+		resizeResults();
 			
-			/* document.getElementById("saveResultsButton").disabled = false; */
-		}
+		/* document.getElementById("saveResultsButton").disabled = false; */
 	}
 }
 
 function fetchPageDetails()
 {
-	resetValues();
-	document.getElementById("fetchDataButton").disabled = true;
-	showLog("Analysis status: analyzing...", false);
+	if(isStringEmpty(currentPageURL))
+	{
+		showLog("Analysis status: Not a valid URL", true);
+	}
+	else if(!isValidUrl(currentPageURL))
+	{
+		showLog("Analysis status: Not a valid URL", true);
+	}
+	else
+	{
+		resetValues();
+		document.getElementById("fetchDataButton").disabled = true;
+		showLog("Analysis status: analyzing...", false);
 
-	let message = {
-		activity: "analyzePage", 
-		reqUrl: currentPageURL.trim()
-	};
+		let message = {
+			activity: "analyzePage", 
+			reqUrl: currentPageURL.trim()
+		};
 
-	chrome.runtime.sendMessage(message, function(resp) { processResponseFetchPageDetails(resp); });
+		chrome.runtime.sendMessage(message, function(resp) { processResponseFetchPageDetails(resp); });
+	}
+	
 }
 
 //-------------------------

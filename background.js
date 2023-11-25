@@ -108,6 +108,12 @@ function parseResponseFetchPageDetails(request, response, pageDetails)
 	pageDetails.responseStatus.url = request.reqUrl;
 	pageDetails.responseStatus.httpStatus = response.status;
 
+	if(response.status > 299)
+	{
+		pageDetails.isError = true;
+		pageDetails.message = "Non-success response";
+	}
+
 	let analysisObject= getDefaultAnalysisObject();
 	analysisObject.observation = "yet to be implemented";
 	analysisObject.suggestions.push("yet to be implemented");
