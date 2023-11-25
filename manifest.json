@@ -12,11 +12,11 @@
 	"offline_enabled": false,
 	"host_permissions": ["https://*/"],
 	"permissions" : [
-		"storage"
+		"contextMenus",
+		"sidePanel"
 	],
-	"action":{
-		"default_popup": "pageAnalyzer.html",
-		"default_title": "Page analyzer"
+	"side_panel": {
+		"default_path": "pageAnalyzer.html"
 	},
 	"background": {
 		"service_worker": "background.js"

@@ -1,4 +1,3 @@
-const extensionStorage = chrome.storage.local; //USE chrome.storage.sync INSTEAD
 const domainNameRegex = /^https:\/\/([^\/]+)\/.*/i;
 var currentPageURL = "";
 

@@ -62,17 +62,87 @@ function getDefaultResponseObject(request, response)
 
 //-------------------------
 
+chrome.runtime.onInstalled.addListener(() => {
+	console.debug("bg : onInstalled : page analyzer extension initiated.");
+
+	// -----
+
+	chrome.contextMenus.create({
+		id: "openAnalyzerPanel",
+		title: "Analyze this page",
+		contexts: ["all"]
+	});
+	console.debug("bg : onInstalled : page analyzer context menu added.");
+});
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+	if (info.menuItemId === "openAnalyzerPanel")
+	{
+		console.debug("tab changed to <" + tab.tabId + ">");
+		(async () => {
+			await chrome.sidePanel
+				.setOptions({
+						tabId: tab.tabId,
+						path: "pageAnalyzer.html",
+						enabled: true
+					})
+				.catch((error) => console.error(error));
+		})();
+		console.debug("bg : onInstalled : page analyzer side panel created.");
+
+		//get data
+
+		chrome.sidePanel.open({ tabId: tab.tabId, windowId: tab.windowId });
+	}
+});
+
+chrome.tabs.onActivated.addListener(async ({ tabId }) => {
+	const panelOptions = await chrome.sidePanel.getOptions({ tabId });
+	const panelTabId = panelOptions.tabId;
+
+	if (panelTabId === tabId)
+	{
+		panelOptions.enabled = true;
+		chrome.sidePanel.open({ tabId: tab.tabId, windowId: tab.windowId }); //TODO : NOT WORKING
+	}
+	else
+	{
+		await chrome.sidePanel.setOptions({
+			enabled: false
+		});
+	}
+});
+
+chrome.runtime.onMessage.addListener(
+	function (request, sender, sendResponse) {
+		console.debug("bg : onMessage : request.activity <" + request.activity + ">");
+		if (request.activity == "analyzePage")
+		{
+			processMessageFetchPageDetails(request, sendResponse);
+		}
+		else
+		{
+			console.debug("bg : onMessage : invalid message <" + request.activity + ">");
+			let errResp = {isError: true, message: "invalid message <" + request.activity + ">"};
+			sendResponse({response : JSON.stringify(errResp)});
+		}
+		return true;
+	}
+);
+
+//-------------------------
+
 function getReadableTTL(input)
 {
 	//console.debug("ttlsec [", input, "]");
 	
 	//https://stackoverflow.com/questions/8211744/convert-time-interval-given-in-seconds-into-more-human-readable-form
 	let levels = [
-		[Math.floor(input / 31536000), 'years'],
-		[Math.floor((input % 31536000) / 86400), 'days'],
-		[Math.floor(((input % 31536000) % 86400) / 3600), 'hours'],
-		[Math.floor((((input % 31536000) % 86400) % 3600) / 60), 'minutes'],
-		[(((input % 31536000) % 86400) % 3600) % 60, 'seconds'],
+		[Math.floor(input / 31536000), "years"],
+		[Math.floor((input % 31536000) / 86400), "days"],
+		[Math.floor(((input % 31536000) % 86400) / 3600), "hours"],
+		[Math.floor((((input % 31536000) % 86400) % 3600) / 60), "minutes"],
+		[(((input % 31536000) % 86400) % 3600) % 60, "seconds"],
 	];
 	
 	let ttl = "";
@@ -151,26 +221,3 @@ function processMessageFetchPageDetails(request, sendResponse)
 		sendResponse({response : JSON.stringify(pageDetails)});
 	});
 }
-
-//-------------------------
-
-chrome.runtime.onMessage.addListener(
-	function (request, sender, sendResponse) {
-		console.debug("bg : onMessage : request.activity <" + request.activity + ">");
-		if (request.activity == "analyzePage")
-		{
-			processMessageFetchPageDetails(request, sendResponse);
-		}
-		else
-		{
-			console.debug("bg : onMessage : invalid message <" + request.activity + ">");
-			let errResp = {isError: true, message: "invalid message <" + request.activity + ">"};
-			sendResponse({response : JSON.stringify(errResp)});
-		}
-		return true;
-	}
-);
-
-chrome.runtime.onInstalled.addListener(() => {
-	console.debug("bg : onInstalled : page analyzer extension initiated.");
-});

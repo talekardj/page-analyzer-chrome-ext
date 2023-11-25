@@ -1,6 +1,6 @@
 body
 {
-	width: 450px;
+	width: 95%;
 
 	background-color: rgb(28, 28, 28);
 	color: white;
@@ -53,11 +53,11 @@ hr
 	color: white;
 	border: none;
 	
-	width: 400px;
-	max-width: 400px;
+	width: 100%;
+	max-width: 100%;
 	height: 20px;
 	min-height: 20px;
-	max-height: 350px;
+	max-height: 100%;
 
 	font-size: small;
 	word-wrap: normal;
