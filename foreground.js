@@ -1,30 +1,8 @@
 const domainNameRegex = /^https:\/\/([^\/]+)\/.*/i;
-var currentPageURL = "";
 
 function isStringEmpty(inputVal)
 {
 	return (inputVal == undefined || inputVal == null || inputVal.length === 0 || inputVal.toString().replace(/\s/g,"") == "") ? true : false;
-}
-
-function isValidUrl(inputVal)
-{
-	try
-	{
-		new URL(inputVal);
-		return true;
-	}
-	catch (err)
-	{
-		return false;
-	}
-}
-
-function getCurrentPageURL()
-{
-	chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
-		currentPageURL = tabs[0].url;
-	});
-	return currentPageURL;
 }
 
 function getDomainNameFromUrl(inputVal)
@@ -89,13 +67,21 @@ function bindHandlers()
 
 	chrome.runtime.onMessage.addListener(
 		function(request, sender, sendResponse) {
-			if (request.activity === "analyzePageComplete")
+			alert("fg : bindHandlers : activity <" + request.activity + ">");
+			if (request.activity === "analyzePageStarted")
+			{
+				showLog("Analysis status: analyzing...", false);
+				sendResponse("ok");
+			}
+			else if (request.activity === "analyzePageComplete")
 			{
 				processResponseFetchPageDetails(JSON.stringify(request.data));
+				sendResponse("ok");
 			}
 			else
 			{
-				console.error("bg : onMessage : invalid message <" + request.activity + ">");
+				showLog("fg : bindHandlers : invalid message <" + request.activity + ">", true);
+				sendResponse("invalid message <" + request.activity + ">");
 			}
 			return true;
 		}
@@ -104,7 +90,6 @@ function bindHandlers()
 
 function initialize()
 {
-	currentPageURL = getCurrentPageURL();
 	resetValues();
 	bindHandlers();
 }

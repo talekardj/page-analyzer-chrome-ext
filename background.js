@@ -78,7 +78,6 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.contextMenus.onClicked.addListener((info, tab) => {
 	if (info.menuItemId === "openAnalyzerPanel")
 	{
-		console.debug("tab changed to <" + tab.tabId + ">");
 		(async () => {
 			await chrome.sidePanel
 				.setOptions({
@@ -88,15 +87,27 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 					})
 				.catch((error) => console.error(error));
 		})();
-		console.debug("bg : onInstalled : page analyzer side panel created.");
+		console.debug("bg : openAnalyzerPanel : page analyzer side panel created.");
 
-		chrome.sidePanel.open({ tabId: tab.tabId, windowId: tab.windowId });
-
-		// -----
-
-		chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
-			processMessageFetchPageDetails(tabs[0].url);
-		});
+		chrome.sidePanel.open({ tabId: tab.tabId, windowId: tab.windowId },
+			() => {
+				chrome.tabs.query({currentWindow: true, active: true}, 
+					function(tabs){
+						let activeTab = tabs[0];
+						
+						chrome.runtime.sendMessage({ activity: "analyzePageStarted", data: "" },
+							(function(response) {
+								processMessageFetchPageDetails(activeTab.url).then(pageDetails => {
+									console.debug("bg : openAnalyzerPanel : pageDetails <" + JSON.stringify(pageDetails) + ">");
+									chrome.runtime.sendMessage({ activity: "analyzePageComplete", data: pageDetails },
+									(function(response) {
+										//doNothing
+									}));
+								});
+							})
+						);
+				});
+			});
 	}
 });
 
@@ -120,13 +131,13 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
 chrome.runtime.onMessage.addListener(
 	function (request, sender, sendResponse) {
 		console.debug("bg : onMessage : request.activity <" + request.activity + ">");
-		if (request.activity == "analyzePage")
+		if (request.activity == "xyz")
 		{
-			processMessageFetchPageDetails(request, sendResponse);
+			//
 		}
 		else
 		{
-			console.debug("bg : onMessage : invalid message <" + request.activity + ">");
+			console.error("bg : onMessage : invalid message <" + request.activity + ">");
 			let errResp = {isError: true, message: "invalid message <" + request.activity + ">"};
 			sendResponse({response : JSON.stringify(errResp)});
 		}
@@ -196,38 +207,32 @@ function parseResponseFetchPageDetails(reqUrl, response, pageDetails)
 	return pageDetails;
 }
 
-function processMessageFetchPageDetails(reqUrl)
+async function processMessageFetchPageDetails(reqUrl)
 {
 	console.debug("bg : processMessageFetchPageDetails : reqUrl <" + reqUrl + ">");
-	timeout(timeoutMsec, 
+	
+	let pageDetails = {};
+	
+	await timeout(timeoutMsec, 
 			fetch(reqUrl, {
 				method: "GET",
 				headers: debugHeaders,
 				mode: "cors"
 			}))
 	.then(function(response) {
-		let pageDetails = getDefaultResponseObject();
-		pageDetails.isError = false;
-		pageDetails.message = "success";
-		pageDetails = parseResponseFetchPageDetails(reqUrl, response, pageDetails);
-		console.debug("bg : processMessageFetchPageDetails : pageDetails <" + JSON.stringify(pageDetails) + ">");
-
-		chrome.runtime.sendMessage({
-			activity: "analyzePageComplete", 
-			data: pageDetails
-		});
+		let responseObject = getDefaultResponseObject();
+		responseObject.isError = false;
+		responseObject.message = "success";
+		pageDetails = parseResponseFetchPageDetails(reqUrl, response, responseObject);
 	})
 	.catch(function (err) {
 		console.error("bg : processMessageFetchPageDetails : fetch failed <" + err.message + ">");
-		let pageDetails = getDefaultResponseObject();
-		pageDetails.isError = true;
-		pageDetails.message = err.message;
-		pageDetails = parseResponseFetchPageDetails(reqUrl, response, pageDetails);
-		console.error("bg : processMessageFetchPageDetails : pageDetails <" + JSON.stringify(pageDetails) + ">");
-
-		chrome.runtime.sendMessage({
-			activity: "analyzePageComplete", 
-			data: pageDetails
-		});
+		let responseObject = getDefaultResponseObject();
+		responseObject.isError = true;
+		responseObject.message = err.message;
+		pageDetails = parseResponseFetchPageDetails(reqUrl, response, responseObject);
 	});
+
+	console.debug("bg : processMessageFetchPageDetails : pageDetails <" + JSON.stringify(pageDetails) + ">");
+	return pageDetails;
 }
