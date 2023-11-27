@@ -108,7 +108,6 @@ chrome.runtime.onMessage.addListener(
 		{
 			processMessageAnalyzePage();
 		}
-		return true;
 	}
 );
 

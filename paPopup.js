@@ -69,7 +69,6 @@ function bindHandlers()
 			{
 				processResponseFetchPageDetails(JSON.stringify(request.data));
 			}
-			return true;
 		}
 	);
 }
