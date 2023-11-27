@@ -20,5 +20,12 @@
 	},
 	"background": {
 		"service_worker": "paBackground.js"
-	}
+	},
+	"content_scripts": [
+		{
+			"js": ["paContent.js"],
+			"matches": ["https://*/*"],
+			"run_at": "document_start"
+		}
+	]
 }

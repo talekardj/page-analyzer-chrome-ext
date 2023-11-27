@@ -1,13 +1,6 @@
-const domainNameRegex = /^https:\/\/([^\/]+)\/.*/i;
-
 function isStringEmpty(inputVal)
 {
 	return (inputVal == undefined || inputVal == null || inputVal.length === 0 || inputVal.toString().replace(/\s/g,"") == "") ? true : false;
-}
-
-function getDomainNameFromUrl(inputVal)
-{
-	return inputVal.match(domainNameRegex)[1];
 }
 
 function showLog(logStr, isError=false)
@@ -67,21 +60,14 @@ function bindHandlers()
 
 	chrome.runtime.onMessage.addListener(
 		function(request, sender, sendResponse) {
-			alert("pu : bindHandlers : activity <" + request.activity + ">");
+			//alert("pa-p : bindHandlers : activity <" + request.activity + ">");
 			if (request.activity === "analyzePageStarted")
 			{
 				showLog("Analysis status: analyzing...", false);
-				sendResponse("ok");
 			}
 			else if (request.activity === "analyzePageComplete")
 			{
 				processResponseFetchPageDetails(JSON.stringify(request.data));
-				sendResponse("ok");
-			}
-			else
-			{
-				showLog("pu : bindHandlers : invalid message <" + request.activity + ">", true);
-				sendResponse("invalid message <" + request.activity + ">");
 			}
 			return true;
 		}
