@@ -67,7 +67,7 @@ function bindHandlers()
 
 	chrome.runtime.onMessage.addListener(
 		function(request, sender, sendResponse) {
-			alert("fg : bindHandlers : activity <" + request.activity + ">");
+			alert("pu : bindHandlers : activity <" + request.activity + ">");
 			if (request.activity === "analyzePageStarted")
 			{
 				showLog("Analysis status: analyzing...", false);
@@ -80,7 +80,7 @@ function bindHandlers()
 			}
 			else
 			{
-				showLog("fg : bindHandlers : invalid message <" + request.activity + ">", true);
+				showLog("pu : bindHandlers : invalid message <" + request.activity + ">", true);
 				sendResponse("invalid message <" + request.activity + ">");
 			}
 			return true;

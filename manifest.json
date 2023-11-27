@@ -16,9 +16,9 @@
 		"sidePanel"
 	],
 	"side_panel": {
-		"default_path": "pageAnalyzer.html"
+		"default_path": "paPopup.html"
 	},
 	"background": {
-		"service_worker": "background.js"
+		"service_worker": "paBackground.js"
 	}
 }

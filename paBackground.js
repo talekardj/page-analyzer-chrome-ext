@@ -82,7 +82,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 			await chrome.sidePanel
 				.setOptions({
 						tabId: tab.tabId,
-						path: "pageAnalyzer.html",
+						path: "paPopup.html",
 						enabled: true
 					})
 				.catch((error) => console.error(error));
