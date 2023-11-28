@@ -76,13 +76,13 @@ function getDefaultAnalysisObject()
 	};
 }
 
-function getDefaultResponseObject(request, response)
+function getDefaultResponseObject(isErrorVal=false, messageVal="success", urlVal="")
 {
 	return {
-		isError: false,
-		message: "success", 
+		isError: isErrorVal,
+		message: messageVal, 
 		responseStatus : {
-			url: "",
+			url: urlVal,
 			httpStatus: "",
 			pageSize: -1
 		},
@@ -90,12 +90,105 @@ function getDefaultResponseObject(request, response)
 			dnsPrefetches: [],
 			preconnects: [],
 			preloads: [],
-			scripts: [],
-			stylesheets: [],
 			images: [],
-			fonts: []
+			fonts: [],
+			videos: [],
+			stylesheets: [],
+			scripts: [],
+			scriplets: [],
+			domainsReferred: []
 		},
 		analysis: []
+	};
+}
+
+function getDefaultDnsPrefetchObject(hrefVal="", isCrossOriginVal=false)
+{
+	return {
+		href: hrefVal,
+		isCrossOrigin: isCrossOriginVal,
+		domain: ""
+	};
+}
+
+function getDefaultPreconnectObject(hrefVal="", isCrossOriginVal=false)
+{
+	return {
+		href: hrefVal,
+		isCrossOrigin: isCrossOriginVal,
+		domain: ""
+	};
+}
+
+function getDefaultPreloadObject(hrefVal="", asVal=false)
+{
+	return {
+		href: hrefVal,
+		as: asVal,
+		domain: ""
+	};
+}
+
+function getDefaultImageObject(srcVal="")
+{
+	return {
+		src: srcVal,
+		type: "",
+		size: -1,
+		domain: "",
+		initiator: ""
+	};
+}
+
+function getDefaultJsScriptObject(srcVal="")
+{
+	return {
+		src: srcVal,
+		size: -1,
+		type: "",
+		domain: "",
+		initiator: ""
+	};
+}
+
+function getDefaultJsScriptletObject(contentVal="")
+{
+	return {
+		content: contentVal,
+		size: -1,
+		type: "",
+		domain: "",
+		initiator: ""
+	};
+}
+
+function getDefaultCssObject(hrefVal="")
+{
+	return {
+		href: hrefVal,
+		size: -1,
+		domain: "",
+		initiator: ""
+	};
+}
+
+function getDefaultFontObject(srcVal="")
+{
+	return {
+		src: srcVal,
+		size: -1,
+		domain: "",
+		initiator: ""
+	};
+}
+
+function getDefaultVideoObject(srcVal="")
+{
+	return {
+		src: srcVal,
+		size: -1,
+		domain: "",
+		initiator: ""
 	};
 }
 
@@ -125,16 +218,73 @@ function getAnalysis(pageDetails)
 
 function analyzePage()
 {
-	let pageDetails = getDefaultResponseObject();
+	let pageDetails = getDefaultResponseObject(false, "success", window.location.href);
 
 	//-----
 
-	pageDetails.isError = false;
-	pageDetails.message = "success";
-	pageDetails.responseStatus.url = window.location.href;
+	let pageElements = document.querySelectorAll("link[rel='dns-prefetch']");
+	console.debug("pa-c : analyzePage : dns-prefetch <" + pageElements.length + ">");
+	pageElements.forEach(pageElement => {
+		let elementTypeObject = getDefaultDnsPrefetchObject();
+		elementTypeObject.href = pageElement.getAttribute("href");
+		//TODO : get domain and other attributes
+		pageDetails.pageContents.dnsPrefetches.push(elementTypeObject);
+	});
 
-	/* let missingImgCount = document.querySelectorAll("img[src*='/img/missing-image.svg']").length;
-	console.debug("pa-c : load : missingImgCount <" + missingImgCount + ">"); */
+	pageElements = document.querySelectorAll("link[rel='preconnect']");
+	console.debug("pa-c : analyzePage : preconnect <" + pageElements.length + ">");
+	pageElements.forEach(pageElement => {
+		let elementTypeObject = getDefaultPreconnectObject();
+		elementTypeObject.href = pageElement.getAttribute("href");
+		//TODO : get domain and other attributes
+		pageDetails.pageContents.preconnects.push(elementTypeObject);
+	});
+
+	pageElements = document.querySelectorAll("link[rel='preload']");
+	console.debug("pa-c : analyzePage : preload <" + pageElements.length + ">");
+	pageElements.forEach(pageElement => {
+		let elementTypeObject = getDefaultPreloadObject();
+		elementTypeObject.href = pageElement.getAttribute("href");
+		elementTypeObject.as = pageElement.getAttribute("as");
+		//TODO : get domain and other attributes
+		pageDetails.pageContents.preloads.push(elementTypeObject);
+	});
+
+	pageElements = document.querySelectorAll("img");
+	console.debug("pa-c : analyzePage : img <" + pageElements.length + ">");
+	pageElements.forEach(pageElement => {
+		let elementTypeObject = getDefaultImageObject();
+		elementTypeObject.src = pageElement.getAttribute("src");
+		//TODO : get domain and other attributes
+		pageDetails.pageContents.images.push(elementTypeObject);
+	});
+
+	pageElements = document.querySelectorAll("link[rel='stylesheet']");
+	console.debug("pa-c : analyzePage : stylesheet <" + pageElements.length + ">");
+	pageElements.forEach(pageElement => {
+		let elementTypeObject = getDefaultCssObject();
+		elementTypeObject.href = pageElement.getAttribute("href");
+		//TODO : get domain and other attributes
+		pageDetails.pageContents.stylesheets.push(elementTypeObject);
+	});
+
+	pageElements = document.querySelectorAll("script[src]");
+	console.debug("pa-c : analyzePage : script <" + pageElements.length + ">");
+	pageElements.forEach(pageElement => {
+		let elementTypeObject = getDefaultJsScriptObject();
+		elementTypeObject.src = pageElement.getAttribute("href");
+		//TODO : get domain and other attributes
+		pageDetails.pageContents.scripts.push(elementTypeObject);
+	});
+
+	pageElements = document.querySelectorAll("script:not(src)");
+	console.debug("pa-c : analyzePage : scriptlet <" + pageElements.length + ">");
+	pageElements.forEach(pageElement => {
+		let elementTypeObject = getDefaultJsScriptletObject();
+		elementTypeObject.src = pageElement.getAttribute("src");
+		//TODO : get domain and other attributes
+		pageDetails.pageContents.scriplets.push(elementTypeObject);
+	});
 
 	//-----
 
