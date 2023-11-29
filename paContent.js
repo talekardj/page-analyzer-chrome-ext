@@ -208,10 +208,53 @@ chrome.runtime.onMessage.addListener(
 
 function getAnalysis(pageDetails)
 {
-	let analysisObject= getDefaultAnalysisObject();
-	analysisObject.observation = "yet to be implemented";
-	analysisObject.suggestions.push("yet to be implemented");
-	pageDetails.analysis.push(analysisObject);
+	if(pageDetails.pageContents.dnsPrefetches.length > 0)
+	{
+		let analysisObject= getDefaultAnalysisObject();
+		analysisObject.observation = "Page contains dns-prefetch elements [" + pageDetails.pageContents.dnsPrefetches.length + "]." ;
+		analysisObject.suggestions.push("Use preconnect element instead, as it is superset of dns-prefetch.");
+		pageDetails.analysis.push(analysisObject);
+	}
+	
+	if(pageDetails.pageContents.preconnects.length > 5)
+	{
+		let analysisObject= getDefaultAnalysisObject();
+		analysisObject.observation = "Page contains too many preconnects [" + pageDetails.pageContents.preconnects.length + "]." ;
+		analysisObject.suggestions.push("Restrict the number of preconnects to no more than 5.");
+		pageDetails.analysis.push(analysisObject);
+	}
+	
+	if(pageDetails.pageContents.preloads.length > 5)
+	{
+		let analysisObject= getDefaultAnalysisObject();
+		analysisObject.observation = "Page contains too many preloads [" + pageDetails.pageContents.preloads.length + "]." ;
+		analysisObject.suggestions.push("Restrict the number of preloads to no more than 5.");
+		pageDetails.analysis.push(analysisObject);
+	}
+	
+	if(pageDetails.pageContents.stylesheets.length > 15)
+	{
+		let analysisObject= getDefaultAnalysisObject();
+		analysisObject.observation = "Page contains too many stylesheets [" + pageDetails.pageContents.stylesheets.length + "]." ;
+		analysisObject.suggestions.push("Restrict the number of stylesheets to no more than 15.");
+		pageDetails.analysis.push(analysisObject);
+	}
+	
+	if(pageDetails.pageContents.scripts.length > 15)
+	{
+		let analysisObject= getDefaultAnalysisObject();
+		analysisObject.observation = "Page contains too many scripts [" + pageDetails.pageContents.scripts.length + "]." ;
+		analysisObject.suggestions.push("Restrict the number of scripts to no more than 15.");
+		pageDetails.analysis.push(analysisObject);
+	}
+	
+	if(pageDetails.pageContents.scriplets.length > 0)
+	{
+		let analysisObject= getDefaultAnalysisObject();
+		analysisObject.observation = "Page contains too many scriplets [" + pageDetails.pageContents.scriplets.length + "]." ;
+		analysisObject.suggestions.push("Move them to the script files.");
+		pageDetails.analysis.push(analysisObject);
+	}
 
 	return pageDetails;
 }
@@ -227,7 +270,7 @@ function analyzePage()
 	pageElements.forEach(pageElement => {
 		let elementTypeObject = getDefaultDnsPrefetchObject();
 		elementTypeObject.href = pageElement.getAttribute("href");
-		//TODO : get domain and other attributes
+		//TODO : get other attributes
 		pageDetails.pageContents.dnsPrefetches.push(elementTypeObject);
 	});
 
@@ -236,7 +279,7 @@ function analyzePage()
 	pageElements.forEach(pageElement => {
 		let elementTypeObject = getDefaultPreconnectObject();
 		elementTypeObject.href = pageElement.getAttribute("href");
-		//TODO : get domain and other attributes
+		//TODO : get other attributes
 		pageDetails.pageContents.preconnects.push(elementTypeObject);
 	});
 
@@ -246,7 +289,7 @@ function analyzePage()
 		let elementTypeObject = getDefaultPreloadObject();
 		elementTypeObject.href = pageElement.getAttribute("href");
 		elementTypeObject.as = pageElement.getAttribute("as");
-		//TODO : get domain and other attributes
+		//TODO : get other attributes
 		pageDetails.pageContents.preloads.push(elementTypeObject);
 	});
 
@@ -255,7 +298,7 @@ function analyzePage()
 	pageElements.forEach(pageElement => {
 		let elementTypeObject = getDefaultImageObject();
 		elementTypeObject.src = pageElement.getAttribute("src");
-		//TODO : get domain and other attributes
+		//TODO : get other attributes
 		pageDetails.pageContents.images.push(elementTypeObject);
 	});
 
@@ -264,7 +307,7 @@ function analyzePage()
 	pageElements.forEach(pageElement => {
 		let elementTypeObject = getDefaultCssObject();
 		elementTypeObject.href = pageElement.getAttribute("href");
-		//TODO : get domain and other attributes
+		//TODO : get other attributes
 		pageDetails.pageContents.stylesheets.push(elementTypeObject);
 	});
 
@@ -273,7 +316,7 @@ function analyzePage()
 	pageElements.forEach(pageElement => {
 		let elementTypeObject = getDefaultJsScriptObject();
 		elementTypeObject.src = pageElement.getAttribute("href");
-		//TODO : get domain and other attributes
+		//TODO : get other attributes
 		pageDetails.pageContents.scripts.push(elementTypeObject);
 	});
 
@@ -282,7 +325,7 @@ function analyzePage()
 	pageElements.forEach(pageElement => {
 		let elementTypeObject = getDefaultJsScriptletObject();
 		elementTypeObject.src = pageElement.getAttribute("src");
-		//TODO : get domain and other attributes
+		//TODO : get other attributes
 		pageDetails.pageContents.scriplets.push(elementTypeObject);
 	});
 

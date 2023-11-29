@@ -27,6 +27,31 @@ function openPortalUrl()
 
 //-------------------------
 
+function renderResults(data)
+{
+	document.getElementById("analysis").innerHTML = "";
+	//document.getElementById("analysis").innerHTML = JSON.stringify(data, null, 4);
+	
+	let observationUl = document.createElement("ul");
+	data.analysis.forEach(note => {
+		let observationLi = document.createElement("li");
+		observationLi.innerHTML = "Observation: " + note.observation + "</br>Suggestions:";
+		
+		let suggestionUl = document.createElement("ul");
+		note.suggestions.forEach(suggestion => {
+			let suggestionLi = document.createElement("li");
+			suggestionLi.innerHTML = suggestion;
+
+			suggestionUl.appendChild(suggestionLi);
+		});
+		observationLi.appendChild(suggestionUl);
+
+		observationUl.appendChild(observationLi);
+	});
+	
+	document.getElementById("analysis").appendChild(observationUl);
+}
+
 function processResponseFetchPageDetails(resp)
 {
 	if(isStringEmpty(resp))
@@ -36,12 +61,9 @@ function processResponseFetchPageDetails(resp)
 	else
 	{
 		let data = JSON.parse(resp);
-
 		showLog("Analysis status: " + data.message, data.isError);
+		renderResults(data);
 		
-		document.getElementById("analysis").value = JSON.stringify(data, null, 4);
-		resizeResults();
-			
 		/* document.getElementById("saveResultsButton").disabled = false; */
 	}
 }
@@ -51,7 +73,7 @@ function processResponseFetchPageDetails(resp)
 function resetValues()
 {
 	showLog("-", false);
-	document.getElementById("analysis").value = "-";
+	//document.getElementById("analysis").innerText = "-";
 }
 
 function bindHandlers()
